@@ -8,6 +8,7 @@
 
 import UIKit
 import XCTest
+import FutureKit
 
 class FutureKitTests: XCTestCase {
     
@@ -208,6 +209,112 @@ class FutureKitTests: XCTestCase {
             
             return {
                 XCTAssertEqual(0, cnt, "")
+            }
+        }
+    }
+    
+    func test_zip_順次の処理だとタイムアウトになる２つの処理が並列に実行される() {
+        var cnt = 0
+        let counter = { ++cnt }
+        
+        self.wait { done in
+            
+            let u = Future { deferred in
+                dispatch_after(when(0.8), dispatch_get_main_queue()) {
+                    deferred.resolve(100)
+                }
+            }
+            
+            
+            let v = Future { deferred in
+                dispatch_after(when(0.9), dispatch_get_main_queue()) {
+                    deferred.resolve("future v")
+                }
+            }
+            
+            zip(u, v).eval({ lhs in
+                done()
+                counter()
+                XCTAssertEqual(lhs.0, 100, "")
+                XCTAssertEqual(lhs.1, "future v", "")
+            })
+            
+            return {
+                XCTAssertEqual(1, cnt, "")
+            }
+        }
+    }
+    
+    func test_zip_片方が失敗した場合はそこで次の処理に入る() {
+        var cnt = 0
+        let counter = { ++cnt }
+        
+        self.wait { done in
+            
+            let u = Future<Int> { deferred in
+                dispatch_after(when(0.8), dispatch_get_main_queue()) {
+                    deferred.reject(NSError(domain: "", code: 100, userInfo: nil))
+                }
+            }
+            
+            
+            let v = Future { deferred in
+                dispatch_after(when(2), dispatch_get_main_queue()) {
+                    deferred.resolve("future v")
+                }
+            }
+            
+            zip(u, v).eval({ (u, v) in
+                done()
+                counter()
+                XCTAssertEqual(u, 100, "")
+                XCTAssertEqual(v, "future v", "")
+            }).fail({ e in
+                done()
+                XCTAssertEqual(e.code, 100, "")
+            })
+            
+            return {
+                XCTAssertEqual(0, cnt, "")
+            }
+        }
+    }
+    
+    func test_zip_順次の処理だとタイムアウトになる３つの処理が並列に実行される() {
+        var cnt = 0
+        let counter = { ++cnt }
+        
+        self.wait { done in
+            
+            let u = Future { deferred in
+                dispatch_after(when(0.8), dispatch_get_main_queue()) {
+                    deferred.resolve(100)
+                }
+            }
+            
+            
+            let v = Future { deferred in
+                dispatch_after(when(0.8), dispatch_get_main_queue()) {
+                    deferred.resolve("future v")
+                }
+            }
+            
+            let w = Future { deferred in
+                dispatch_after(when(0.8), dispatch_get_main_queue()) {
+                    deferred.resolve(10.0)
+                }
+            }
+            
+            zip(u, v, w).eval({ (u, v, w) in
+                done()
+                counter()
+                XCTAssertEqual(u, 100, "")
+                XCTAssertEqual(v, "future v", "")
+                XCTAssertEqual(w, 10.0, "")
+            })
+            
+            return {
+                XCTAssertEqual(1, cnt, "")
             }
         }
     }
