@@ -8,7 +8,7 @@
 
 import UIKit
 import XCTest
-import FutureKit
+//import FutureKit
 
 class FutureKitTests: XCTestCase {
     
@@ -227,7 +227,7 @@ class FutureKitTests: XCTestCase {
             
             
             let v = Future { deferred in
-                dispatch_after(when(0.9), dispatch_get_main_queue()) {
+                dispatch_after(when(0.8), dispatch_get_main_queue()) {
                     deferred.resolve("future v")
                 }
             }

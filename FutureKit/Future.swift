@@ -56,6 +56,13 @@ public final class Future<T> {
     
     var failableOf: FailableOf<T>?
     
+    /// isReady
+    public internal(set) var isReady: Bool = true
+    /// isExecuting
+    public internal(set) var isExecuting: Bool = false
+    /// isFinished
+    public internal(set) var isFinished: Bool = false
+    
     /**
     init
     
@@ -221,23 +228,22 @@ public final class Future<T> {
             if let failableOf = self.failableOf {
                 f(failableOf)
             } else {
+                self.isReady = false
+                self.isExecuting = true
                 let resolve: T -> Void = { v in
                     self.failableOf = .Success(Box(v))
                     f(self.failableOf!)
+                    self.isExecuting = false
+                    self.isFinished = true
                 }
                 let reject: NSError -> Void = { e in
                     self.failableOf = .Failure(e)
                     f(self.failableOf!)
+                    self.isExecuting = false
+                    self.isFinished = true
                 }
                 self.deferred(resolve: resolve, reject: reject)
             }
-        }
-    }
-    
-    func _eval() {
-        
-        dispatch_async(future_queue) {
-            self.deferred(resolve: { _ in }, reject: { _ in })
         }
     }
 }
