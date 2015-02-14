@@ -10,6 +10,8 @@
 		D9C709F31A8F3DF600324EF8 /* FutureKit.h in Headers */ = {isa = PBXBuildFile; fileRef = D9C709F21A8F3DF600324EF8 /* FutureKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D9C709F91A8F3DF600324EF8 /* FutureKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9C709ED1A8F3DF600324EF8 /* FutureKit.framework */; };
 		D9C70A001A8F3DF600324EF8 /* FutureKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C709FF1A8F3DF600324EF8 /* FutureKitTests.swift */; };
+		D9C70A0A1A8F3E1100324EF8 /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C70A091A8F3E1100324EF8 /* Future.swift */; };
+		D9C70A0B1A8F3E1100324EF8 /* Future.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C70A091A8F3E1100324EF8 /* Future.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +31,7 @@
 		D9C709F81A8F3DF600324EF8 /* FutureKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FutureKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9C709FE1A8F3DF600324EF8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D9C709FF1A8F3DF600324EF8 /* FutureKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutureKitTests.swift; sourceTree = "<group>"; };
+		D9C70A091A8F3E1100324EF8 /* Future.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Future.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +76,7 @@
 			children = (
 				D9C709F21A8F3DF600324EF8 /* FutureKit.h */,
 				D9C709F01A8F3DF600324EF8 /* Supporting Files */,
+				D9C70A091A8F3E1100324EF8 /* Future.swift */,
 			);
 			path = FutureKit;
 			sourceTree = "<group>";
@@ -209,6 +213,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9C70A0A1A8F3E1100324EF8 /* Future.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,6 +221,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9C70A0B1A8F3E1100324EF8 /* Future.swift in Sources */,
 				D9C70A001A8F3DF600324EF8 /* FutureKitTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -319,6 +325,7 @@
 		D9C70A041A8F3DF600324EF8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -328,12 +335,14 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		D9C70A051A8F3DF600324EF8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
