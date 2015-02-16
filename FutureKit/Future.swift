@@ -9,7 +9,9 @@
 import Foundation
 
 
-private let future_queue = dispatch_queue_create("jp.sora0077.future.queue", nil)
+let future_queue = {
+    dispatch_queue_create("jp.sora0077.future.queue", nil)!
+}
 
 final class Box<T> {
     
@@ -24,26 +26,6 @@ enum FailableOf<T> {
     
     case Success(Box<T>)
     case Failure(NSError)
-    
-    var value: T {
-        
-        switch self {
-        case let .Success(box):
-            return box.unbox
-        case let .Failure(error):
-            fatalError("\(error)")
-        }
-    }
-    
-    var error: NSError {
-        
-        switch self {
-        case let .Success(box):
-            fatalError("\(box.unbox)")
-        case let .Failure(error):
-            return error
-        }
-    }
 }
 
 /**
@@ -53,6 +35,8 @@ public final class Future<T> {
     
     typealias Deferred = (resolve: T -> Void, reject: NSError -> Void) -> Void
     let deferred: Deferred
+    
+    var queue: dispatch_queue_t
     
     var failableOf: FailableOf<T>?
     
@@ -70,9 +54,15 @@ public final class Future<T> {
     
     :returns: <#return value description#>
     */
-    public init(_ block: Deferred) {
+    public convenience init(_ block: Deferred) {
+        
+        self.init(block, queue: future_queue())
+    }
+    
+    init(_ block: Deferred, queue: dispatch_queue_t) {
         
         self.deferred = block
+        self.queue = queue
     }
     
     /**
@@ -121,7 +111,7 @@ public final class Future<T> {
                     deferred.reject(error)
                 }
             }
-        })
+        }, queue: self.queue)
     }
     
     /**
@@ -138,6 +128,7 @@ public final class Future<T> {
                 switch f {
                 case let .Success(box):
                     let promise = transform(box.unbox)
+                    promise.queue = self.queue
                     promise._eval { f in
                         switch f {
                         case let .Success(box):
@@ -150,7 +141,7 @@ public final class Future<T> {
                     deferred.reject(error)
                 }
             }
-        })
+        }, queue: self.queue)
     }
     
     /**
@@ -169,6 +160,7 @@ public final class Future<T> {
                     deferred.resolve(box.unbox)
                 case let .Failure(error):
                     let promise = transform(error)
+                    promise.queue = self.queue
                     promise._eval { f in
                         switch f {
                         case let .Success(box):
@@ -179,7 +171,7 @@ public final class Future<T> {
                     }
                 }
             }
-        })
+        }, queue: self.queue)
     }
     
     /**
@@ -224,7 +216,7 @@ public final class Future<T> {
     
     func _eval(f: FailableOf<T> -> Void) {
         
-        dispatch_async(future_queue) {
+        dispatch_async(self.queue) {
             if let failableOf = self.failableOf {
                 f(failableOf)
             } else {
@@ -267,9 +259,10 @@ public func zip<U, V>(fu: Future<U>, fv: Future<V>) -> Future<(U, V)> {
         
         fu.eval({ lhs in
             dispatch_async(serial) {
-                results.0 = lhs
                 if let v = results.1 {
                     deferred.resolve((lhs, v))
+                } else {
+                    results.0 = lhs
                 }
             }
         }).fail({ e in
@@ -283,9 +276,10 @@ public func zip<U, V>(fu: Future<U>, fv: Future<V>) -> Future<(U, V)> {
         
         fv.eval({ lhs in
             dispatch_async(serial) {
-                results.1 = lhs
                 if let u = results.0 {
                     deferred.resolve((u, lhs))
+                } else {
+                    results.1 = lhs
                 }
             }
         }).fail({ e in

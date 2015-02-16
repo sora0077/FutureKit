@@ -22,6 +22,11 @@ class FutureKitTests: XCTestCase {
         super.tearDown()
     }
     
+    func test_queue() {
+        
+        XCTAssertNotEqual(future_queue(), future_queue(), "")
+    }
+    
     func test_then() {
         var cnt = 0
         let counter = { ++cnt }
