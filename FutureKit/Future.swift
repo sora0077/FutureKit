@@ -8,9 +8,19 @@
 
 import Foundation
 
-
 let future_queue = {
-    dispatch_queue_create("jp.sora0077.future.queue", nil)!
+    dispatch_queue_create("jp.sora0077.future.queue-\(arc4random_uniform(UInt32.max))", nil)!
+}
+
+func safe_queue_sync(queue: dispatch_queue_t, block: dispatch_block_t) {
+    
+    let queue_label = dispatch_queue_get_label(queue)
+    let current_label = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL)
+    if queue_label != current_label {
+        dispatch_sync(queue, block)
+    } else {
+        block()
+    }
 }
 
 final class Box<T> {
@@ -223,16 +233,22 @@ public final class Future<T> {
                 self.isReady = false
                 self.isExecuting = true
                 let resolve: T -> Void = { v in
-                    self.failableOf = .Success(Box(v))
-                    f(self.failableOf!)
-                    self.isExecuting = false
-                    self.isFinished = true
+                    
+                    safe_queue_sync(self.queue) {
+                        self.failableOf = .Success(Box(v))
+                        f(self.failableOf!)
+                        self.isExecuting = false
+                        self.isFinished = true
+                    }
                 }
                 let reject: NSError -> Void = { e in
-                    self.failableOf = .Failure(e)
-                    f(self.failableOf!)
-                    self.isExecuting = false
-                    self.isFinished = true
+                    
+                    safe_queue_sync(self.queue) {
+                        self.failableOf = .Failure(e)
+                        f(self.failableOf!)
+                        self.isExecuting = false
+                        self.isFinished = true
+                    }
                 }
                 self.deferred(resolve: resolve, reject: reject)
             }

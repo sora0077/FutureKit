@@ -45,6 +45,7 @@ class FutureKitTests: XCTestCase {
             
             return {
                 XCTAssertEqual(1, cnt, "")
+                XCTAssertEqual(p1.queue, p2.queue, "")
             }
         }
     }
@@ -104,14 +105,15 @@ class FutureKitTests: XCTestCase {
             p2.eval({ lhs in
                 done()
                 XCTAssertEqual(lhs, "101 1 to string", "")
+//                XCTAssertTrue(p2.failableOf == nil, "")
             })
             p3.eval({ lhs in
                 done()
                 XCTAssertEqual(lhs, "101 1 to string 2 to string", "")
             })
-            XCTAssertEqual(0, cnt, "")
             
             return {
+                XCTAssertEqual(p2.queue, p3.queue, "")
                 XCTAssertEqual(2, cnt, "")
             }
         }
