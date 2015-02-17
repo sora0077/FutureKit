@@ -49,6 +49,35 @@ class FutureKitTests: XCTestCase {
             }
         }
     }
+    func test_then_resolveが間違って何度も呼ばれてもevalのブロックは一度だけ呼ばれる() {
+        var cnt = 0
+        let counter = { ++cnt }
+        
+        self.wait { done in
+            
+            let p1 = Future<Int>({ deferred in
+                deferred.resolve(100)
+                deferred.resolve(100)
+                deferred.resolve(100)
+            })
+            
+            let p2 = p1.map({
+                "\($0) \(counter()) to string"
+            })
+            
+            p2.eval({ lhs in
+                counter()
+                counter()
+                counter()
+                done()
+            })
+            
+            return {
+                XCTAssertEqual(4, cnt, "")
+                XCTAssertEqual(p1.queue, p2.queue, "")
+            }
+        }
+    }
     
     func test_then_オブジェクトが正しく開放されるか() {
         var cnt = 0

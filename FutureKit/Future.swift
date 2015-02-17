@@ -232,11 +232,13 @@ public final class Future<T> {
             } else {
                 self.isReady = false
                 self.isExecuting = true
+                var f = Optional(f)
                 let resolve: T -> Void = { v in
                     
                     safe_queue_sync(self.queue) {
                         self.failableOf = .Success(Box(v))
-                        f(self.failableOf!)
+                        f?(self.failableOf!)
+                        f = nil
                         self.isExecuting = false
                         self.isFinished = true
                     }
@@ -245,7 +247,8 @@ public final class Future<T> {
                     
                     safe_queue_sync(self.queue) {
                         self.failableOf = .Failure(e)
-                        f(self.failableOf!)
+                        f?(self.failableOf!)
+                        f = nil
                         self.isExecuting = false
                         self.isFinished = true
                     }
