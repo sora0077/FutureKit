@@ -347,3 +347,46 @@ public func zip<X, Y, Z, W>(fx: Future<X>, fy: Future<Y>, fz: Future<Z>, fw: Fut
     })
 }
 
+/**
+zip
+
+:param: fs <#fs description#>
+
+:returns: <#return value description#>
+*/
+public func zip<T>(fs: [Future<T>]) -> Future<[T]> {
+    
+    return zip(fs, take: fs.count)
+}
+
+/**
+zip
+
+:param: fs   <#fs description#>
+:param: take <#take description#>
+
+:returns: <#return value description#>
+*/
+public func zip<T>(fs: [Future<T>], #take: Int) -> Future<[T]> {
+
+    return Future<[T]>({ deferred in
+        
+        let serial = dispatch_queue_create("jp.sora0077.future.queue-zip", nil)
+        
+        var results = [T?](count: take, repeatedValue: nil)
+        for (i, f) in enumerate(fs[0..<take]) {
+            f.eval({ lhs in
+                dispatch_async(serial) {
+                    results[i] = lhs
+                
+                    if results.filter({ $0 != nil }).count == take {
+                        deferred.resolve(results.map({ $0! }))
+                    }
+                }
+            }).fail({ e in
+                deferred.reject(e)
+            })
+        }
+    })
+}
+

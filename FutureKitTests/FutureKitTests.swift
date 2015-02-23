@@ -354,6 +354,29 @@ class FutureKitTests: XCTestCase {
             }
         }
     }
+    
+    func test_zip_Array版() {
+        
+        self.wait { done in
+            
+            let fs = [
+                Future.resolve(1),
+                Future.resolve(10),
+                Future.resolve(100),
+                Future.resolve(1000),
+            ]
+            
+            zip(fs, take: 4).eval({ lhs in
+                
+                XCTAssertEqual(lhs.count, 4, "")
+                done()
+            })
+         
+            return {
+                
+            }
+        }
+    }
 }
 
 let when = { sec in dispatch_time(DISPATCH_TIME_NOW, Int64(sec * Double(NSEC_PER_SEC))) }
