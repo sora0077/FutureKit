@@ -226,7 +226,7 @@ public final class Future<T> {
     
     func _eval(f: FailableOf<T> -> Void) {
         
-        dispatch_async(self.queue) {
+        safe_queue_sync(self.queue) {
             if let failableOf = self.failableOf {
                 f(failableOf)
             } else {
