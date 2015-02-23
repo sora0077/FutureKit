@@ -324,8 +324,8 @@ zip
 public func zip<X, Y, Z>(fx: Future<X>, fy: Future<Y>, fz: Future<Z>) -> Future<(X, Y, Z)> {
     
     let zipped = zip(zip(fx, fy), fz)
-    return zipped.map({ lhs in
-        (lhs.0.0, lhs.0.1, lhs.1)
+    return zipped.map({ xy, z in
+        (xy.0, xy.1, z)
     })
 }
 
@@ -342,8 +342,8 @@ zip
 public func zip<X, Y, Z, W>(fx: Future<X>, fy: Future<Y>, fz: Future<Z>, fw: Future<W>) -> Future<(X, Y, Z, W)> {
     
     let zipped = zip(zip(fx, fy), zip(fz, fw))
-    return zipped.map({ lhs in
-        (lhs.0.0, lhs.0.1, lhs.1.0, lhs.1.1)
+    return zipped.map({ xy, zw in
+        (xy.0, xy.1, zw.0, zw.1)
     })
 }
 
